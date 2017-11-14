@@ -371,6 +371,10 @@ static void main_spi_work_handler(struct work_struct* ws) {
                 vals->i = -1;
         }
         vals->i = (vals->i + 1)%4;
+        if (gpio_get_value(penirq)) {
+            vals->touch = false;
+            diffs->time_down_ns = get_time_ns() - diffs->start_time_ns;
+        }
         msleep(10);
     }
 }
@@ -487,7 +491,7 @@ static int __init initialization(void){
     
     status = request_irq(irqNumber,             // The interrupt number requested
                         (irq_handler_t) penirq_interrupt_handler, // The pointer to the handler function below
-                        IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,   // Interrupt on rising edge (button press, not release)
+                        IRQF_TRIGGER_FALLING,   // Interrupt on rising edge (button press, not release)
                         "penirq_interrupt_handler",    // Used in /proc/interrupts to identify the owner
                         NULL);
                         
